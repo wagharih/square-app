@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Square</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0e0e0f;
+  --surface: #141416;
+  --surface2: #1a1a1d;
+  --surface3: #202024;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
+  --text: #e8e6e1;
+  --text-secondary: #8a8880;
+  --text-dim: #4a4845;
+  --accent: #c8a96e;       /* warm gold — singular accent */
+  --accent-dim: rgba(200,169,110,0.12);
+  --accent-border: rgba(200,169,110,0.25);
+  --green: #4a9b7f;
+  --green-dim: rgba(74,155,127,0.1);
+  --red: #9b4a4a;
+  --red-dim: rgba(155,74,74,0.1);
+  --blue: #4a6f9b;
+  --blue-dim: rgba(74,111,155,0.1);
+  --amber: #9b7a4a;
+  --amber-dim: rgba(155,122,74,0.1);
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:14px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle grain */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:999;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  height: 58px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  background: rgba(14,14,15,0.92);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  cursor: pointer;
+}
+.logo svg { flex-shrink:0; }
+
+.nav-center {
+  display: flex; align-items: center; gap: 2px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+}
+.nav-btn {
+  padding: 5px 16px; border-radius: 6px; border: none; background: transparent;
+  color: var(--text-secondary); font-family: 'Outfit', sans-serif;
+  font-size: 13px; font-weight: 400; cursor: pointer;
+  transition: all 0.18s ease; letter-spacing: 0.01em;
+}
+.nav-btn:hover { color: var(--text); }
+.nav-btn.active { background: var(--surface3); color: var(--text); }
+
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.nav-icon-btn {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  background: transparent; border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.18s;
+  color: var(--text-secondary);
+}
+.nav-icon-btn:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface2); }
+.nav-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 500; color: var(--accent);
+  cursor: pointer; letter-spacing: 0.05em;
+}
+
+/* ── LAYOUT ── */
+.layout { display: flex; padding-top: 58px; min-height: 100vh; }
+
+.sidebar {
+  width: 220px; min-height: calc(100vh - 58px);
+  position: fixed; top: 58px; left: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 12px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.sidebar-section {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-dim);
+  padding: 14px 10px 6px;
+}
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  cursor: pointer; color: var(--text-secondary);
+  font-size: 13px; font-weight: 400;
+  transition: all 0.15s; border: 1px solid transparent;
+}
+.sidebar-item:hover { background: var(--surface2); color: var(--text); border-color: var(--border); }
+.sidebar-item.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-border); }
+.sidebar-item svg { flex-shrink: 0; opacity: 0.7; }
+.sidebar-item.active svg { opacity: 1; }
+
+.sidebar-divider { height: 1px; background: var(--border); margin: 8px 10px; }
+
+.content { margin-left: 220px; flex: 1; padding: 36px 40px; max-width: 1400px; }
+
+/* ── TYPOGRAPHY ── */
+.display { font-family: 'Cormorant Garamond', serif; font-weight: 500; line-height: 1.1; }
+.page-title { font-size: 26px; font-weight: 300; color: var(--text); letter-spacing: -0.02em; margin-bottom: 24px; }
+.section-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-dim); margin-bottom: 14px;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  transition: border-color 0.18s;
+}
+.card:hover { border-color: var(--border-hover); }
+.card-pad { padding: 20px; }
+
+/* ── GRID ── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+
+/* ── PROPERTY CARD ── */
+.prop-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; cursor: pointer;
+  transition: all 0.22s ease;
+}
+.prop-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 16px 48px rgba(0,0,0,0.5); }
+.prop-img {
+  position: relative; height: 190px; overflow: hidden;
+  background: var(--surface2);
+}
+.prop-img img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.4s ease;
+  filter: brightness(0.88) saturate(0.9);
+}
+.prop-card:hover .prop-img img { transform: scale(1.04); }
+.prop-img-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 45%, rgba(14,14,15,0.85) 100%);
+}
+.prop-price {
+  position: absolute; bottom: 12px; left: 14px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 600; color: var(--text);
+  letter-spacing: -0.02em;
+}
+.prop-tags { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; }
+.tag {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+  padding: 3px 8px; border-radius: 4px; backdrop-filter: blur(8px);
+  text-transform: uppercase;
+}
+.tag-gold { background: rgba(200,169,110,0.2); color: var(--accent); border: 1px solid rgba(200,169,110,0.3); }
+.tag-green { background: rgba(74,155,127,0.2); color: #6bbfa3; border: 1px solid rgba(74,155,127,0.3); }
+.tag-amber { background: rgba(155,122,74,0.2); color: #c49a5a; border: 1px solid rgba(155,122,74,0.3); }
+.tag-red { background: rgba(155,74,74,0.2); color: #c47a7a; border: 1px solid rgba(155,74,74,0.3); }
+.tag-blue { background: rgba(74,111,155,0.2); color: #7a9ec4; border: 1px solid rgba(74,111,155,0.3); }
+
+.prop-save {
+  position: absolute; top: 12px; right: 12px;
+  width: 30px; height: 30px; border-radius: 6px;
+  background: rgba(14,14,15,0.7); backdrop-filter: blur(8px);
+  border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.18s; color: var(--text-secondary);
+}
+.prop-save:hover { background: rgba(14,14,15,0.9); color: var(--accent); border-color: var(--accent-border); }
+
+.prop-body { padding: 14px 16px 16px; }
+.prop-address { font-size: 13px; font-weight: 400; color: var(--text); margin-bottom: 6px; line-height: 1.4; }
+.prop-meta { display: flex; gap: 14px; font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; }
+.prop-meta span { display: flex; align-items: center; gap: 4px; }
+.prop-actions { display: flex; gap: 8px; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 8px 18px; border-radius: var(--radius-sm); font-size: 12px;
+  font-weight: 500; cursor: pointer; border: none; font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.02em; transition: all 0.18s ease;
+}
+.btn-gold { background: var(--accent); color: #0e0e0f; }
+.btn-gold:hover { background: #d4b87a; transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--border-hover); color: var(--text); background: var(--surface2); }
+.btn-danger { background: var(--red-dim); color: #c47a7a; border: 1px solid rgba(155,74,74,0.25); }
+.btn-danger:hover { background: rgba(155,74,74,0.2); }
+.btn-sm { padding: 5px 12px; font-size: 11px; }
+.btn-lg { padding: 11px 28px; font-size: 13px; }
+.btn-block { width: 100%; }
+
+/* ── SEARCH BAR ── */
+.search-wrap {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 16px; margin-bottom: 28px;
+  transition: border-color 0.18s;
+}
+.search-wrap:focus-within { border-color: var(--border-hover); }
+.search-wrap svg { color: var(--text-dim); flex-shrink:0; }
+.search-wrap input {
+  background: transparent; border: none; outline: none;
+  color: var(--text); font-family: 'Outfit', sans-serif; font-size: 13px; flex: 1;
+}
+.search-wrap input::placeholder { color: var(--text-dim); }
+.filter-chip {
+  font-size: 11px; font-weight: 400; padding: 5px 12px; border-radius: 5px;
+  border: 1px solid var(--border); background: transparent; color: var(--text-secondary);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap; font-family: 'Outfit', sans-serif;
+}
+.filter-chip:hover { border-color: var(--border-hover); color: var(--text); }
+.filter-chip.on { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
+
+/* ── STAT TILE ── */
+.stat-tile {
+  padding: 18px 20px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); transition: border-color 0.18s;
+}
+.stat-tile:hover { border-color: var(--border-hover); }
+.stat-num { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text); line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.04em; }
+.stat-sub { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+/* ── QUAL CARD ── */
+.qual-hero {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px; margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+.qual-hero::before {
+  content:''; position:absolute; top:-40px; right:-40px;
+  width:220px; height:220px; border-radius:50%;
+  background: radial-gradient(circle, rgba(200,169,110,0.06) 0%, transparent 70%);
+}
+.qual-score-ring { position: relative; width: 80px; height: 80px; flex-shrink:0; }
+.qual-score-ring svg { transform: rotate(-90deg); }
+.qual-score-num {
+  position: absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight:600; color:var(--accent);
+}
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+.pill-green { background: var(--green-dim); color: #6bbfa3; border: 1px solid rgba(74,155,127,0.25); }
+.pill-blue { background: var(--blue-dim); color: #7a9ec4; border: 1px solid rgba(74,111,155,0.25); }
+.pill-amber { background: var(--amber-dim); color: #c49a5a; border: 1px solid rgba(155,122,74,0.25); }
+.pill-dim { background: var(--surface3); color: var(--text-secondary); border: 1px solid var(--border); }
+
+.qual-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+.qual-cell {
+  background: var(--surface2); border-radius: var(--radius-sm); padding: 14px;
+  border: 1px solid var(--border);
+}
+.qual-cell-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
+.qual-cell-val { font-size: 16px; font-weight: 500; color: var(--text); }
+.qual-cell-val.gold { color: var(--accent); }
+.qual-cell-val.green { color: #6bbfa3; }
+
+/* ── LOAN CARD ── */
+.loan-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 8px;
+  cursor: pointer; transition: all 0.18s;
+}
+.loan-row:hover { border-color: var(--border-hover); background: var(--surface2); }
+.loan-row.best { border-color: var(--accent-border); background: var(--accent-dim); }
+.lender-mark {
+  width: 40px; height: 40px; border-radius: var(--radius-sm); flex-shrink:0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; font-family: 'Outfit', sans-serif; letter-spacing: 0.03em;
+}
+.loan-info { flex: 1; }
+.loan-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.loan-meta { font-size: 11px; color: var(--text-secondary); }
+.loan-rate-big { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 500; color: var(--text); text-align: right; line-height: 1; }
+.loan-rate-label { font-size: 10px; color: var(--text-secondary); text-align: right; margin-top: 2px; }
+
+/* ── OFFER STEPS ── */
+.step-track { display: flex; align-items: center; margin-bottom: 32px; }
+.step-node { display: flex; align-items: center; gap: 8px; }
+.step-circle {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink:0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500;
+}
+.step-circle.done { background: var(--accent); color: #0e0e0f; }
+.step-circle.active { background: var(--surface3); color: var(--text); border: 1px solid var(--border-hover); }
+.step-circle.todo { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+.step-label { font-size: 12px; }
+.step-label.done { color: var(--accent); }
+.step-label.active { color: var(--text); font-weight: 500; }
+.step-label.todo { color: var(--text-dim); }
+.step-line { flex: 1; height: 1px; background: var(--border); margin: 0 10px; }
+.step-line.done { background: var(--accent-border); }
+
+/* ── BAR ── */
+.bar-wrap { height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.8s ease; }
+.bar-fill.green { background: var(--green); }
+.bar-fill.blue { background: var(--blue); }
+
+/* ── TICKET ROW ── */
+.ticket {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 8px; cursor: pointer;
+  transition: all 0.18s;
+}
+.ticket:hover { border-color: var(--border-hover); background: var(--surface2); }
+.ticket-icon {
+  width: 34px; height: 34px; border-radius: var(--radius-sm); flex-shrink:0;
+  background: var(--surface3); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; color: var(--text-secondary);
+}
+.ticket-id { font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em; margin-bottom: 3px; }
+.ticket-addr { font-size: 13px; font-weight: 400; color: var(--text); margin-bottom: 5px; }
+.ticket-row-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ticket-actions { display: flex; gap: 6px; margin-left: auto; flex-shrink:0; align-items: center; }
+
+/* ── AGENT ROW ── */
+.agent-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); margin-bottom: 6px; transition: all 0.15s;
+}
+.agent-row:hover { border-color: var(--border-hover); }
+.agent-av {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink:0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+}
+.agent-name { font-size: 13px; font-weight: 400; color: var(--text); }
+.agent-zone { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+.online-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink:0; margin-left: auto;
+}
+.online-dot.green { background: #4a9b7f; }
+.online-dot.amber { background: #9b7a4a; }
+.online-dot.dim { background: var(--text-dim); }
+
+/* ── CONTRACTOR ── */
+.contractor-row {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 16px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 8px; transition: all 0.18s; cursor: pointer;
+}
+.contractor-row:hover { border-color: var(--border-hover); background: var(--surface2); }
+.contractor-av {
+  width: 40px; height: 40px; border-radius: var(--radius-sm); flex-shrink:0;
+  background: var(--surface3); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; color: var(--text-secondary);
+}
+.stars-row { display: flex; align-items: center; gap: 3px; }
+.star { width: 10px; height: 10px; color: var(--accent); }
+.star.dim { color: var(--surface3); }
+
+/* ── REVENUE ROW ── */
+.rev-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+.rev-label { font-size: 13px; color: var(--text); }
+.rev-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.rev-amount { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; }
+
+/* ── INPUT ── */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+.field input, .field select {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 9px 12px; color: var(--text);
+  font-family: 'Outfit', sans-serif; font-size: 13px; outline: none;
+  transition: border-color 0.15s;
+}
+.field input:focus, .field select:focus { border-color: var(--border-hover); }
+.field input::placeholder { color: var(--text-dim); }
+
+/* ── DIVIDER ── */
+hr { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+/* ── TIMELINE ── */
+.tl-row { display: flex; gap: 12px; margin-bottom: 14px; }
+.tl-dot-wrap { display: flex; flex-direction: column; align-items: center; }
+.tl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink:0; }
+.tl-dot.dim { background: var(--surface3); border: 1px solid var(--border); }
+.tl-line { width: 1px; flex: 1; background: var(--border); margin-top: 4px; }
+.tl-text { font-size: 13px; color: var(--text); padding-top: 0px; }
+.tl-time { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+/* ── MODAL ── */
+.modal-bg {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(10,10,10,0.75); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-bg.open { opacity: 1; pointer-events: all; }
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 32px; max-width: 460px; width: 90%;
+  position: relative;
+}
+.modal-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 28px; height: 28px; border-radius: var(--radius-sm);
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text-secondary); cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.modal-close:hover { color: var(--text); border-color: var(--border-hover); }
+
+/* ── PAGE SHOW/HIDE ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.fu  { animation: fadeUp 0.35s ease both; }
+.fu2 { animation: fadeUp 0.35s 0.08s ease both; }
+.fu3 { animation: fadeUp 0.35s 0.16s ease both; }
+.fu4 { animation: fadeUp 0.35s 0.24s ease both; }
+
+/* Mode switcher */
+.mode-tabs {
+  display: flex; gap: 3px; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 3px; width: fit-content;
+}
+.mode-tab {
+  padding: 5px 14px; border-radius: 4px; font-size: 12px; cursor: pointer;
+  border: none; background: transparent; color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif; transition: all 0.15s;
+}
+.mode-tab:hover { color: var(--text); }
+.mode-tab.active { background: var(--surface3); color: var(--text); }
+
+/* inline flex gap helper */
+.row { display: flex; align-items: center; gap: 10px; }
+.row.sb { justify-content: space-between; }
+.row.wrap { flex-wrap: wrap; }
+.mt8 { margin-top: 8px; }
+.mt14 { margin-top: 14px; }
+.mt20 { margin-top: 20px; }
+.mb8 { margin-bottom: 8px; }
+.mb14 { margin-bottom: 14px; }
+.mb20 { margin-bottom: 20px; }
+.gold { color: var(--accent); }
+.muted { color: var(--text-secondary); }
+.dim { color: var(--text-dim); }
+
+/* Seller enterprise header */
+.ent-header {
+  display: flex; align-items: center; gap: 20px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px 24px; margin-bottom: 24px;
+}
+.ent-logo {
+  width: 50px; height: 50px; border-radius: var(--radius-sm); flex-shrink:0;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 600; color: var(--text-secondary);
+  font-family: 'Cormorant Garamond', serif;
+}
+.ent-stats { display: flex; gap: 32px; margin-left: auto; }
+.ent-stat-num { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 500; color: var(--text); line-height: 1; }
+.ent-stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="switchPage('browse')">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <rect x="1.5" y="1.5" width="25" height="25" rx="1.5" stroke="#c8a96e" stroke-width="1.5"/>
+      <polyline points="6,17 14,8.5 22,17" stroke="#c8a96e" stroke-width="1.4" stroke-linejoin="round" fill="none"/>
+      <line x1="8" y1="17" x2="8" y2="23" stroke="#c8a96e" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="20" y1="17" x2="20" y2="23" stroke="#c8a96e" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="8" y1="23" x2="20" y2="23" stroke="#c8a96e" stroke-width="1.4" stroke-linecap="round"/>
+      <rect x="12" y="18" width="4" height="5" rx="0.5" stroke="#c8a96e" stroke-width="1.2"/>
+    </svg>
+    Square
+  </div>
+
+  <div class="nav-center">
+    <button class="nav-btn active" onclick="switchPage('browse')">Browse</button>
+    <button class="nav-btn" onclick="switchPage('qualify')">Pre-Qualify</button>
+    <button class="nav-btn" onclick="switchPage('offer')">Offer</button>
+    <button class="nav-btn" onclick="switchPage('contractor')">Contractors</button>
+    <button class="nav-btn" onclick="switchPage('seller')">Seller</button>
+  </div>
+
+  <div class="nav-right">
+    <!-- Bell -->
+    <div class="nav-icon-btn" style="position:relative;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+      </svg>
+      <div style="position:absolute;top:6px;right:6px;width:5px;height:5px;border-radius:50%;background:#9b4a4a;border:1.5px solid var(--bg);"></div>
+    </div>
+    <!-- Search -->
+    <div class="nav-icon-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+    </div>
+    <div class="nav-avatar">CW</div>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-section">Explore</div>
+  <div class="sidebar-item active" onclick="switchPage('browse')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    Browse Listings
+  </div>
+  <div class="sidebar-item" onclick="switchPage('qualify')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
+    Pre-Qualification
+    <div style="margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0.7;"></div>
+  </div>
+  <div class="sidebar-item" onclick="switchPage('offer')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+    Make an Offer
+  </div>
+  <div class="sidebar-item" onclick="switchPage('contractor')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    Contractors
+  </div>
+  <div class="sidebar-item" onclick="switchPage('seller')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+    Seller Portal
+  </div>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section">My Activity</div>
+  <div class="sidebar-item">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+    Saved Homes
+  </div>
+  <div class="sidebar-item">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Market Insights
+  </div>
+  <div class="sidebar-item">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    Messages
+  </div>
+
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section">Account</div>
+  <div class="sidebar-item">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Profile
+  </div>
+  <div class="sidebar-item">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    Settings
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="layout">
+<div class="content">
+
+<!-- ══════════════════════════════════════
+     PAGE: BROWSE
+════════════════════════════════════════ -->
+<div id="page-browse" class="page active">
+
+  <!-- Hero -->
+  <div class="fu" style="margin-bottom:32px;">
+    <div class="section-label">Houston Metropolitan Area</div>
+    <h1 class="display" style="font-size:38px; font-weight:400; color:var(--text); margin-bottom:10px; letter-spacing:-0.02em;">
+      Find your next property.
+    </h1>
+    <p style="font-size:14px; color:var(--text-secondary); max-width:480px; line-height:1.6; margin-bottom:28px;">
+      Live MLS data, instant pre-qualification, and one-click offers — no agents, no delays.
+    </p>
+    <div class="g4 fu2" style="max-width:600px;">
+      <div class="stat-tile">
+        <div class="stat-num">12,847</div>
+        <div class="stat-label">Active Listings</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-num">3.2m</div>
+        <div class="stat-label">Avg Pre-Qual</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-num">$0</div>
+        <div class="stat-label">Agent Fees</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-num">48h</div>
+        <div class="stat-label">Avg Close</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrap fu2">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" placeholder="Search by city, zip, neighborhood or address…"/>
+    <div class="filter-chip on">For Sale</div>
+    <div class="filter-chip">For Rent</div>
+    <div class="filter-chip">Price ↓</div>
+    <div class="filter-chip">Beds</div>
+    <div class="filter-chip">Move-in Ready</div>
+    <div class="filter-chip">Needs Work</div>
+    <button class="btn btn-gold btn-sm">Search</button>
+  </div>
+
+  <div class="section-label fu3">Featured Listings — 12,847 results</div>
+
+  <!-- Property Grid -->
+  <div class="g3 fu3">
+
+    <!-- Card 1 -->
+    <div class="prop-card">
+      <div class="prop-img">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=70" alt="Property"/>
+        <div class="prop-img-overlay"></div>
+        <div class="prop-tags">
+          <span class="tag tag-green">Qualifies</span>
+          <span class="tag tag-gold">New</span>
+        </div>
+        <div class="prop-price">$385,000</div>
+        <div class="prop-save" onclick="event.stopPropagation()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </div>
+      </div>
+      <div class="prop-body">
+        <div class="prop-address">4821 Elmwood Drive, Houston TX 77084</div>
+        <div class="prop-meta">
+          <span>4 bd</span><span>2.5 ba</span><span>2,140 sqft</span>
+        </div>
+        <div class="prop-actions">
+          <button class="btn btn-gold btn-sm" onclick="switchPage('offer')">Make Offer</button>
+          <button class="btn btn-ghost btn-sm">Schedule Tour</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="prop-card">
+      <div class="prop-img">
+        <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&q=70" alt="Property"/>
+        <div class="prop-img-overlay"></div>
+        <div class="prop-tags">
+          <span class="tag tag-amber">Needs Work</span>
+        </div>
+        <div class="prop-price">$219,000</div>
+        <div class="prop-save" onclick="event.stopPropagation()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </div>
+      </div>
+      <div class="prop-body">
+        <div class="prop-address">1103 Oak Blvd, Katy TX 77450</div>
+        <div class="prop-meta"><span>3 bd</span><span>2 ba</span><span>1,780 sqft</span></div>
+        <div style="background:var(--amber-dim); border:1px solid rgba(155,122,74,0.2); border-radius:var(--radius-sm); padding:8px 10px; margin-bottom:12px; font-size:11px; color:#c49a5a; display:flex; align-items:center; gap:7px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          Est. renovation $42–55k · Contractors matched
+        </div>
+        <div class="prop-actions">
+          <button class="btn btn-gold btn-sm" onclick="switchPage('offer')">Make Offer</button>
+          <button class="btn btn-ghost btn-sm" onclick="switchPage('contractor')">View Contractors</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="prop-card">
+      <div class="prop-img">
+        <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&q=70" alt="Property"/>
+        <div class="prop-img-overlay"></div>
+        <div class="prop-tags">
+          <span class="tag tag-green">Qualifies</span>
+          <span class="tag tag-red">Hot</span>
+        </div>
+        <div class="prop-price">$512,000</div>
+        <div class="prop-save" onclick="event.stopPropagation()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </div>
+      </div>
+      <div class="prop-body">
+        <div class="prop-address">7740 Cypress Creek, Sugar Land TX 77479</div>
+        <div class="prop-meta"><span>5 bd</span><span>3 ba</span><span>3,200 sqft</span></div>
+        <div class="prop-actions">
+          <button class="btn btn-gold btn-sm" onclick="switchPage('offer')">Make Offer</button>
+          <button class="btn btn-ghost btn-sm">Schedule Tour</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="prop-card">
+      <div class="prop-img">
+        <img src="https://images.unsplash.com/photo-1598228723793-52759bba239c?w=600&q=70" alt="Property"/>
+        <div class="prop-img-overlay"></div>
+        <div class="prop-tags"><span class="tag tag-gold">New</span></div>
+        <div class="prop-price">$298,500</div>
+        <div class="prop-save" onclick="event.stopPropagation()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </div>
+      </div>
+      <div class="prop-body">
+        <div class="prop-address">309 Magnolia Lane, Pearland TX 77584</div>
+        <div class="prop-meta"><span>3 bd</span><span>2 ba</span><span>1,960 sqft</span></div>
+        <div class="prop-actions">
+          <button class="btn btn-gold btn-sm" onclick="switchPage('qualify')">Check Eligibility</button>
+          <button class="btn btn-ghost btn-sm">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="prop-card">
+      <div class="prop-img">
+        <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600&q=70" alt="Property"/>
+        <div class="prop-img-overlay"></div>
+        <div class="prop-tags"><span class="tag tag-amber">Needs Work</span></div>
+        <div class="prop-price">$175,000</div>
+        <div class="prop-save" onclick="event.stopPropagation()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </div>
+      </div>
+      <div class="prop-body">
+        <div class="prop-address">512 River Oaks St, Pasadena TX 77502</div>
+        <div class="prop-meta"><span>3 bd</span><span>1 ba</span><span>1,320 sqft</span></div>
+        <div style="background:var(--amber-dim); border:1px solid rgba(155,122,74,0.2); border-radius:var(--radius-sm); padding:8px 10px; margin-bottom:12px; font-size:11px; color:#c49a5a; display:flex; align-items:center; gap:7px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          Est. renovation $28–35k · Contractors matched
+        </div>
+        <div class="prop-actions">
+          <button class="btn btn-gold btn-sm" onclick="switchPage('offer')">Make Offer</button>
+          <button class="btn btn-ghost btn-sm" onclick="switchPage('contractor')">Contractors</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="prop-card">
+      <div class="prop-img">
+        <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600&q=70" alt="Property"/>
+        <div class="prop-img-overlay"></div>
+        <div class="prop-tags"><span class="tag tag-green">Qualifies</span></div>
+        <div class="prop-price">$445,000</div>
+        <div class="prop-save" onclick="event.stopPropagation()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </div>
+      </div>
+      <div class="prop-body">
+        <div class="prop-address">1881 Greenbrook Ct, The Woodlands TX 77380</div>
+        <div class="prop-meta"><span>4 bd</span><span>3 ba</span><span>2,640 sqft</span></div>
+        <div class="prop-actions">
+          <button class="btn btn-gold btn-sm" onclick="switchPage('offer')">Make Offer</button>
+          <button class="btn btn-ghost btn-sm">Schedule Tour</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: PRE-QUALIFY
+════════════════════════════════════════ -->
+<div id="page-qualify" class="page">
+  <div class="page-title fu display">Pre-Qualification</div>
+
+  <div class="qual-hero fu">
+    <div class="row sb" style="margin-bottom:20px;">
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:500; margin-bottom:8px;">Charles Wesley</div>
+        <div class="row" style="gap:8px; flex-wrap:wrap;">
+          <span class="status-pill pill-green">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+            Approved
+          </span>
+          <span class="status-pill pill-blue">FHA Eligible</span>
+          <span class="status-pill pill-blue">VA Eligible</span>
+        </div>
+        <div style="font-size:12px; color:var(--text-dim); margin-top:8px;">Updated 2 hours ago</div>
+      </div>
+      <div class="qual-score-ring">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="33" stroke="var(--surface3)" stroke-width="5" fill="none"/>
+          <circle cx="40" cy="40" r="33" stroke="var(--accent)" stroke-width="5" fill="none"
+            stroke-dasharray="207.3" stroke-dashoffset="53.7" stroke-linecap="round"/>
+        </svg>
+        <div class="qual-score-num">742</div>
+      </div>
+    </div>
+
+    <div class="bar-wrap mb8"><div class="bar-fill" style="width:74.2%"></div></div>
+    <div style="font-size:11px; color:var(--text-dim); margin-bottom:20px;">Credit score · 742 / 850</div>
+
+    <div class="qual-grid">
+      <div class="qual-cell">
+        <div class="qual-cell-label">Max Purchase</div>
+        <div class="qual-cell-val gold" style="font-family:'Cormorant Garamond',serif; font-size:22px;">$620,000</div>
+      </div>
+      <div class="qual-cell">
+        <div class="qual-cell-label">Monthly Budget</div>
+        <div class="qual-cell-val">$2,850 <span style="font-size:11px; color:var(--text-secondary);">/mo</span></div>
+      </div>
+      <div class="qual-cell">
+        <div class="qual-cell-label">Down Payment</div>
+        <div class="qual-cell-val">$31,000</div>
+      </div>
+      <div class="qual-cell">
+        <div class="qual-cell-label">DTI Ratio</div>
+        <div class="qual-cell-val green">28%</div>
+      </div>
+      <div class="qual-cell">
+        <div class="qual-cell-label">Annual Income</div>
+        <div class="qual-cell-val">$95,000</div>
+      </div>
+      <div class="qual-cell">
+        <div class="qual-cell-label">Employment</div>
+        <div class="qual-cell-val green" style="font-size:13px;">Verified</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label fu2">Matched Loan Offers — 4 lenders</div>
+
+  <div class="fu2">
+    <div class="loan-row best">
+      <div class="lender-mark" style="background:var(--accent-dim); color:var(--accent);">RB</div>
+      <div class="loan-info">
+        <div class="loan-name">Rocket Bank Mortgage <span style="font-size:10px; background:var(--accent); color:#0e0e0f; padding:2px 7px; border-radius:3px; font-weight:600; margin-left:6px; letter-spacing:0.04em;">BEST</span></div>
+        <div class="loan-meta">30-yr Fixed · $0 origination · Pre-approval in 3 min</div>
+      </div>
+      <div>
+        <div class="loan-rate-big gold">6.42<span style="font-size:14px">%</span></div>
+        <div class="loan-rate-label">APR</div>
+      </div>
+      <button class="btn btn-gold btn-sm" style="margin-left:10px;">Apply</button>
+    </div>
+
+    <div class="loan-row">
+      <div class="lender-mark" style="background:var(--blue-dim); color:#7a9ec4;">WF</div>
+      <div class="loan-info">
+        <div class="loan-name">Wells Fargo Home Lending</div>
+        <div class="loan-meta">30-yr Fixed · 1% origination · Pre-approval in 1 day</div>
+      </div>
+      <div>
+        <div class="loan-rate-big">6.58<span style="font-size:14px">%</span></div>
+        <div class="loan-rate-label">APR</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-left:10px;">Apply</button>
+    </div>
+
+    <div class="loan-row">
+      <div class="lender-mark" style="background:var(--amber-dim); color:#c49a5a;">BT</div>
+      <div class="loan-info">
+        <div class="loan-name">BetterRate VA Loan</div>
+        <div class="loan-meta">VA 30-yr Fixed · $0 down · No PMI · Veteran eligible</div>
+      </div>
+      <div>
+        <div class="loan-rate-big">6.11<span style="font-size:14px">%</span></div>
+        <div class="loan-rate-label">APR</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-left:10px;">Apply</button>
+    </div>
+
+    <div class="loan-row">
+      <div class="lender-mark" style="background:var(--red-dim); color:#c47a7a;">LB</div>
+      <div class="loan-info">
+        <div class="loan-name">LoanBridge FHA</div>
+        <div class="loan-meta">FHA 30-yr Fixed · 3.5% down · Low credit friendly</div>
+      </div>
+      <div>
+        <div class="loan-rate-big">6.77<span style="font-size:14px">%</span></div>
+        <div class="loan-rate-label">APR</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-left:10px;">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: OFFER
+════════════════════════════════════════ -->
+<div id="page-offer" class="page">
+  <div class="page-title fu display">Make an Offer</div>
+
+  <div class="step-track fu">
+    <div class="step-node"><div class="step-circle done">✓</div><div class="step-label done">Pre-Qualified</div></div>
+    <div class="step-line done"></div>
+    <div class="step-node"><div class="step-circle done">✓</div><div class="step-label done">Property Selected</div></div>
+    <div class="step-line done"></div>
+    <div class="step-node"><div class="step-circle active">3</div><div class="step-label active">Offer Details</div></div>
+    <div class="step-line"></div>
+    <div class="step-node"><div class="step-circle todo">4</div><div class="step-label todo">Financing</div></div>
+    <div class="step-line"></div>
+    <div class="step-node"><div class="step-circle todo">5</div><div class="step-label todo">Submit</div></div>
+  </div>
+
+  <div class="g2 fu2">
+    <div>
+      <div class="card mb14">
+        <div class="card-pad">
+          <div class="section-label">Property</div>
+          <div style="display:flex; gap:14px; align-items:flex-start;">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=120&q=70" style="width:90px; height:70px; object-fit:cover; border-radius:var(--radius-sm); filter:brightness(0.85);"/>
+            <div>
+              <div style="font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:500; color:var(--text); margin-bottom:3px;">$385,000</div>
+              <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">4821 Elmwood Drive, Houston TX</div>
+              <div class="row" style="gap:12px; font-size:11px; color:var(--text-dim);">
+                <span>4 bd</span><span>2.5 ba</span><span>2,140 sqft</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-pad">
+          <div class="section-label">Offer Details</div>
+          <div class="field"><label>Offer Price</label><input type="text" value="$385,000"/></div>
+          <div class="field"><label>Earnest Money</label><input type="text" value="$5,000"/></div>
+          <div class="field"><label>Closing Date</label><input type="text" value="April 15, 2026"/></div>
+          <div class="field"><label>Contingencies</label><input type="text" value="Inspection, Financing"/></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card mb14">
+        <div class="card-pad">
+          <div class="section-label">Selected Financing</div>
+          <div class="row sb">
+            <div class="row" style="gap:10px;">
+              <div class="lender-mark" style="background:var(--accent-dim); color:var(--accent);">RB</div>
+              <div>
+                <div style="font-size:13px; font-weight:500;">Rocket Bank Mortgage</div>
+                <div style="font-size:11px; color:var(--text-secondary);">30-yr Fixed · 6.42% APR · ~$2,184/mo</div>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm">Change</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb14">
+        <div class="card-pad">
+          <div class="section-label">Offer Strength</div>
+          <div style="margin-bottom:14px;">
+            <div class="row sb mb8" style="font-size:12px;"><span class="muted">vs. Asking Price</span><span class="gold">At Ask</span></div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:75%"></div></div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <div class="row sb mb8" style="font-size:12px;"><span class="muted">Financing</span><span style="color:#6bbfa3;">Pre-Approved</span></div>
+            <div class="bar-wrap"><div class="bar-fill bar-fill.green" style="width:90%; background:var(--green);"></div></div>
+          </div>
+          <div>
+            <div class="row sb mb8" style="font-size:12px;"><span class="muted">Close Speed</span><span style="color:#6bbfa3;">Fast (48h)</span></div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:85%; background:var(--green);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-pad">
+          <div class="section-label">Timeline</div>
+          <div class="tl-row"><div class="tl-dot-wrap"><div class="tl-dot"></div><div class="tl-line"></div></div><div><div class="tl-text">Offer submitted to seller</div><div class="tl-time">Today · Instant</div></div></div>
+          <div class="tl-row"><div class="tl-dot-wrap"><div class="tl-dot dim"></div><div class="tl-line"></div></div><div><div class="tl-text muted">Seller review window</div><div class="tl-time">24–48 hours</div></div></div>
+          <div class="tl-row"><div class="tl-dot-wrap"><div class="tl-dot dim"></div><div class="tl-line"></div></div><div><div class="tl-text muted">Acceptance or counter</div><div class="tl-time">Est. Day 2</div></div></div>
+          <div class="tl-row"><div class="tl-dot-wrap"><div class="tl-dot dim"></div><div class="tl-line"></div></div><div><div class="tl-text muted">Escrow opens</div><div class="tl-time">Est. Day 3</div></div></div>
+          <div class="tl-row" style="margin-bottom:0;"><div class="tl-dot-wrap"><div class="tl-dot dim"></div></div><div><div class="tl-text muted">Closing</div><div class="tl-time">April 15, 2026</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt20 fu3">
+    <button class="btn btn-gold btn-lg" onclick="openModal()">Submit Offer</button>
+    <button class="btn btn-ghost btn-lg">Save Draft</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: CONTRACTORS
+════════════════════════════════════════ -->
+<div id="page-contractor" class="page">
+  <div class="page-title fu display">Contractor Marketplace</div>
+
+  <div style="background:var(--amber-dim); border:1px solid rgba(155,122,74,0.2); border-radius:var(--radius); padding:14px 18px; margin-bottom:24px; display:flex; align-items:center; gap:14px;" class="fu">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c49a5a" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    <div style="flex:1;">
+      <div style="font-size:13px; font-weight:500; color:#c49a5a; margin-bottom:2px;">Matched for: 1103 Oak Blvd, Katy TX 77450</div>
+      <div style="font-size:12px; color:var(--text-secondary);">Estimated renovation range: <strong style="color:var(--text);">$42,000 – $55,000</strong></div>
+    </div>
+    <button class="btn btn-ghost btn-sm">Full Report</button>
+  </div>
+
+  <div class="g2 fu2">
+    <div>
+      <div class="section-label">Matched Contractors</div>
+
+      <div class="contractor-row">
+        <div class="contractor-av" style="color:var(--accent); border-color:var(--accent-border);">MR</div>
+        <div style="flex:1;">
+          <div class="row sb mb8">
+            <div style="font-size:13px; font-weight:500;">Marcus Reid Construction</div>
+            <div style="font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--accent);">$38,500</div>
+          </div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">General Contractor · Full Renovation</div>
+          <div class="row mb8">
+            <div class="stars-row">
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            </div>
+            <span style="font-size:11px; color:var(--text-secondary);">4.9 · 142 reviews</span>
+          </div>
+          <div class="row" style="gap:6px; flex-wrap:wrap;">
+            <span class="status-pill pill-green" style="font-size:10px; padding:2px 8px;">Licensed</span>
+            <span class="status-pill pill-green" style="font-size:10px; padding:2px 8px;">Insured</span>
+            <span class="status-pill pill-dim" style="font-size:10px; padding:2px 8px;">Avail. 14 days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="contractor-row">
+        <div class="contractor-av">TS</div>
+        <div style="flex:1;">
+          <div class="row sb mb8">
+            <div style="font-size:13px; font-weight:500;">Torres & Sons Remodeling</div>
+            <div style="font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--text);">$44,200</div>
+          </div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Kitchen + Bath Specialist</div>
+          <div class="row mb8">
+            <div class="stars-row">
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star dim" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            </div>
+            <span style="font-size:11px; color:var(--text-secondary);">4.8 · 89 reviews</span>
+          </div>
+          <div class="row" style="gap:6px; flex-wrap:wrap;">
+            <span class="status-pill pill-green" style="font-size:10px; padding:2px 8px;">Licensed</span>
+            <span class="status-pill pill-green" style="font-size:10px; padding:2px 8px;">Insured</span>
+            <span class="status-pill pill-dim" style="font-size:10px; padding:2px 8px;">Avail. 7 days</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="contractor-row">
+        <div class="contractor-av" style="color:#c49a5a; border-color:rgba(155,122,74,0.3);">GP</div>
+        <div style="flex:1;">
+          <div class="row sb mb8">
+            <div style="font-size:13px; font-weight:500;">GridPro Electrical</div>
+            <div style="font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--text);">$8,900</div>
+          </div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Electrical · Panel Upgrade + Rewire</div>
+          <div class="row mb8">
+            <div class="stars-row">
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              <svg class="star dim" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+            </div>
+            <span style="font-size:11px; color:var(--text-secondary);">4.6 · 54 reviews</span>
+          </div>
+          <div class="row" style="gap:6px; flex-wrap:wrap;">
+            <span class="status-pill pill-green" style="font-size:10px; padding:2px 8px;">Licensed</span>
+            <span class="status-pill pill-green" style="font-size:10px; padding:2px 8px;">Insured</span>
+            <span class="status-pill pill-dim" style="font-size:10px; padding:2px 8px;">Avail. 3 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Renovation Breakdown</div>
+      <div class="card">
+        <div class="card-pad">
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div>
+              <div class="row sb mb8" style="font-size:13px;"><span class="muted">Windows & Doors</span><span>$8,200</span></div>
+              <div class="bar-wrap"><div class="bar-fill" style="width:33%;"></div></div>
+            </div>
+            <div>
+              <div class="row sb mb8" style="font-size:13px;"><span class="muted">Bathrooms (×2)</span><span>$12,500</span></div>
+              <div class="bar-wrap"><div class="bar-fill" style="width:50%; background:var(--blue);"></div></div>
+            </div>
+            <div>
+              <div class="row sb mb8" style="font-size:13px;"><span class="muted">Kitchen Refresh</span><span>$11,800</span></div>
+              <div class="bar-wrap"><div class="bar-fill" style="width:47%; background:var(--green);"></div></div>
+            </div>
+            <div>
+              <div class="row sb mb8" style="font-size:13px;"><span class="muted">Electrical</span><span>$8,900</span></div>
+              <div class="bar-wrap"><div class="bar-fill" style="width:36%; background:var(--amber);"></div></div>
+            </div>
+            <div>
+              <div class="row sb mb8" style="font-size:13px;"><span class="muted">Paint & Flooring</span><span>$6,100</span></div>
+              <div class="bar-wrap"><div class="bar-fill" style="width:24%;"></div></div>
+            </div>
+          </div>
+          <hr/>
+          <div class="row sb">
+            <span style="font-size:12px; color:var(--text-secondary);">Total Estimate</span>
+            <span style="font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--text);">$42–55k</span>
+          </div>
+          <div style="font-size:11px; color:var(--text-secondary); margin-top:4px; margin-bottom:16px;">Post-renovation est. value: <span style="color:#6bbfa3;">$310,000+</span></div>
+          <button class="btn btn-gold btn-block">Bundle with Property Offer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: SELLER
+════════════════════════════════════════ -->
+<div id="page-seller" class="page">
+  <div class="row sb mb20 fu">
+    <div class="page-title display" style="margin-bottom:0;">Seller Portal</div>
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="switchSellerMode('individual')">Individual</button>
+      <button class="mode-tab" onclick="switchSellerMode('enterprise')">Enterprise</button>
+    </div>
+  </div>
+
+  <!-- INDIVIDUAL -->
+  <div id="seller-individual">
+    <div class="g2 fu">
+      <div>
+        <div class="card mb14">
+          <div class="card-pad">
+            <div class="section-label">Your Listings</div>
+            <div style="display:flex; gap:12px; align-items:center; padding:11px 12px; background:var(--surface2); border-radius:var(--radius-sm); margin-bottom:8px; cursor:pointer; border:1px solid var(--border); transition:border-color 0.15s;" onmouseenter="this.style.borderColor='var(--border-hover)'" onmouseleave="this.style.borderColor='var(--border)'">
+              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=60&q=70" style="width:48px; height:38px; object-fit:cover; border-radius:5px; filter:brightness(0.85);"/>
+              <div style="flex:1;"><div style="font-size:13px; font-weight:400; margin-bottom:2px;">4821 Elmwood Drive, Houston TX</div><div style="font-size:11px; color:var(--text-secondary);">$385,000 · 12 views today</div></div>
+              <span class="status-pill pill-green" style="font-size:10px;">Active</span>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center; padding:11px 12px; background:var(--surface2); border-radius:var(--radius-sm); cursor:pointer; border:1px solid var(--border); transition:border-color 0.15s;" onmouseenter="this.style.borderColor='var(--border-hover)'" onmouseleave="this.style.borderColor='var(--border)'">
+              <img src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=60&q=70" style="width:48px; height:38px; object-fit:cover; border-radius:5px; filter:brightness(0.85);"/>
+              <div style="flex:1;"><div style="font-size:13px; font-weight:400; margin-bottom:2px;">7740 Cypress Creek, Sugar Land TX</div><div style="font-size:11px; color:var(--text-secondary);">$512,000 · 8 views today</div></div>
+              <span class="status-pill pill-green" style="font-size:10px;">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-pad">
+            <div class="row sb mb14">
+              <div class="section-label" style="margin-bottom:0;">Incoming Offers</div>
+              <span style="font-size:10px; background:var(--red-dim); color:#c47a7a; border:1px solid rgba(155,74,74,0.25); padding:2px 8px; border-radius:20px; font-weight:500;">3 new</span>
+            </div>
+            <div style="padding:12px; background:var(--surface2); border:1px solid var(--accent-border); border-radius:var(--radius-sm); margin-bottom:8px;">
+              <div class="row sb mb8"><span style="font-size:13px; font-weight:500;">Offer #1 — Full Ask</span><span style="font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--accent);">$385,000</span></div>
+              <div style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">Pre-approved · 30-day close · Financing contingency</div>
+              <div class="row" style="gap:6px;"><button class="btn btn-gold btn-sm">Accept</button><button class="btn btn-ghost btn-sm">Counter</button><button class="btn btn-danger btn-sm">Decline</button></div>
+            </div>
+            <div style="padding:12px; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm);">
+              <div class="row sb mb8"><span style="font-size:13px; font-weight:500;">Offer #2 — Below Ask</span><span style="font-family:'Cormorant Garamond',serif; font-size:18px;">$371,000</span></div>
+              <div style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">Pre-approved · 45-day close · Inspection + financing</div>
+              <div class="row" style="gap:6px;"><button class="btn btn-gold btn-sm">Accept</button><button class="btn btn-ghost btn-sm">Counter</button><button class="btn btn-danger btn-sm">Decline</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card mb14">
+          <div class="card-pad">
+            <div class="section-label">Performance</div>
+            <div class="g2" style="gap:10px; margin-bottom:14px;">
+              <div style="background:var(--surface2); border-radius:var(--radius-sm); padding:14px; border:1px solid var(--border); text-align:center;"><div style="font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:500; color:var(--text);">247</div><div style="font-size:11px; color:var(--text-secondary);">Total Views</div></div>
+              <div style="background:var(--surface2); border-radius:var(--radius-sm); padding:14px; border:1px solid var(--border); text-align:center;"><div style="font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:500; color:var(--text);">18</div><div style="font-size:11px; color:var(--text-secondary);">Saved</div></div>
+              <div style="background:var(--surface2); border-radius:var(--radius-sm); padding:14px; border:1px solid var(--border); text-align:center;"><div style="font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:500; color:var(--accent);">3</div><div style="font-size:11px; color:var(--text-secondary);">Offers</div></div>
+              <div style="background:var(--surface2); border-radius:var(--radius-sm); padding:14px; border:1px solid var(--border); text-align:center;"><div style="font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:500; color:var(--text);">$0</div><div style="font-size:11px; color:var(--text-secondary);">Fees Saved</div></div>
+            </div>
+            <div style="background:var(--accent-dim); border:1px solid var(--accent-border); border-radius:var(--radius-sm); padding:11px 14px; font-size:12px; color:var(--text-secondary);">Showing to <strong style="color:var(--accent);">620 pre-qualified buyers</strong> nationally.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-pad">
+            <div class="section-label">List a Property</div>
+            <div class="field"><label>Address</label><input type="text" placeholder="Full property address…"/></div>
+            <div class="field"><label>Asking Price</label><input type="text" placeholder="$0,000"/></div>
+            <div class="field"><label>Condition</label><input type="text" placeholder="Move-in ready / Needs work…"/></div>
+            <button class="btn btn-gold btn-block">List on Square</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENTERPRISE -->
+  <div id="seller-enterprise" style="display:none;">
+    <div class="ent-header fu">
+      <div class="ent-logo">IH</div>
+      <div>
+        <div style="font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:500; margin-bottom:3px;">Invitation Homes</div>
+        <div style="font-size:12px; color:var(--text-secondary);">Enterprise Account · Since Jan 2024</div>
+        <div class="mt8"><span class="status-pill pill-green" style="font-size:10px;">Premium Plan</span></div>
+      </div>
+      <div class="ent-stats">
+        <div><div class="ent-stat-num">4,218</div><div class="ent-stat-label">Active Listings</div></div>
+        <div><div class="ent-stat-num" style="color:var(--accent);">312</div><div class="ent-stat-label">Open Tickets</div></div>
+        <div><div class="ent-stat-num">28</div><div class="ent-stat-label">Agents</div></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto;">Manage Team</button>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:20px;">
+
+      <!-- LEFT: Ticket Queue -->
+      <div>
+        <div class="row sb mb14">
+          <div class="section-label" style="margin-bottom:0;">Offer Tickets <span style="font-weight:400; color:var(--text-dim); letter-spacing:0; text-transform:none; font-size:11px;">312 unassigned</span></div>
+          <div class="row" style="gap:6px;">
+            <button class="btn btn-ghost btn-sm" onclick="autoAssign()">Auto-assign</button>
+            <button class="btn btn-gold btn-sm">+ Rule</button>
+          </div>
+        </div>
+
+        <div class="row" style="gap:6px; margin-bottom:14px; flex-wrap:wrap;">
+          <div class="filter-chip on" style="font-size:11px;">All 312</div>
+          <div class="filter-chip" style="font-size:11px;">Unassigned 87</div>
+          <div class="filter-chip" style="font-size:11px;">In Review 142</div>
+          <div class="filter-chip" style="font-size:11px;">Pending 83</div>
+        </div>
+
+        <!-- Tickets -->
+        <div class="ticket" id="tkt1">
+          <div class="ticket-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="ticket-id">TKT-4821</div>
+            <div class="ticket-addr">4821 Elmwood Drive, Houston TX</div>
+            <div class="ticket-row-meta">
+              <span style="font-family:'Cormorant Garamond',serif; font-size:16px; color:var(--accent);">$385,000</span>
+              <span class="status-pill pill-green" style="font-size:10px; padding:2px 8px;">Full Ask</span>
+              <span class="status-pill pill-blue" style="font-size:10px; padding:2px 8px;">Pre-Approved</span>
+              <span style="font-size:11px; color:var(--text-dim); margin-left:auto;">2hr ago</span>
+            </div>
+            <div class="row mt8" style="gap:6px; font-size:11px; color:var(--text-secondary); flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:5px;"><div style="width:18px;height:18px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--accent);font-weight:600;">SR</div> Sarah R.</div>
+              <span class="dim">· 30-day close</span>
+              <div class="ticket-actions">
+                <button class="btn btn-gold btn-sm" style="font-size:10px;" onclick="approveTicket('tkt1')">Approve</button>
+                <button class="btn btn-ghost btn-sm" style="font-size:10px;">Counter</button>
+                <button class="btn btn-danger btn-sm" style="font-size:10px;">Decline</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ticket" id="tkt2" style="border-color:rgba(155,122,74,0.2);">
+          <div class="ticket-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="ticket-id">TKT-3307</div>
+            <div class="ticket-addr">1103 Oak Blvd, Katy TX 77450</div>
+            <div class="ticket-row-meta">
+              <span style="font-family:'Cormorant Garamond',serif; font-size:16px;">$201,500</span>
+              <span class="status-pill pill-amber" style="font-size:10px; padding:2px 8px;">Below Ask −$17.5k</span>
+              <span class="status-pill" style="font-size:10px; padding:2px 8px; background:var(--red-dim); color:#c47a7a; border-color:rgba(155,74,74,0.25);">Unassigned</span>
+              <span style="font-size:11px; color:var(--text-dim); margin-left:auto;">5hr ago</span>
+            </div>
+            <div class="row mt8" style="gap:6px; flex-wrap:wrap;">
+              <span style="font-size:11px; color:#c47a7a;">No agent assigned</span>
+              <div class="ticket-actions">
+                <button class="btn btn-ghost btn-sm" style="font-size:10px;" onclick="assignTicket('tkt2')">Assign</button>
+                <button class="btn btn-danger btn-sm" style="font-size:10px;">Decline</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ticket" id="tkt3">
+          <div class="ticket-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="ticket-id">TKT-2294</div>
+            <div class="ticket-addr">7740 Cypress Creek, Sugar Land TX</div>
+            <div class="ticket-row-meta">
+              <span style="font-family:'Cormorant Garamond',serif; font-size:16px; color:#6bbfa3;">$528,000</span>
+              <span class="status-pill pill-green" style="font-size:10px; padding:2px 8px;">Above Ask +$16k</span>
+              <span class="status-pill pill-blue" style="font-size:10px; padding:2px 8px;">In Review</span>
+              <span style="font-size:11px; color:var(--text-dim); margin-left:auto;">1hr ago</span>
+            </div>
+            <div class="row mt8" style="gap:6px; font-size:11px; color:var(--text-secondary); flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:5px;"><div style="width:18px;height:18px;border-radius:50%;background:var(--amber-dim);border:1px solid rgba(155,122,74,0.3);display:flex;align-items:center;justify-content:center;font-size:9px;color:#c49a5a;font-weight:600;">MJ</div> Marcus J.</div>
+              <span class="dim">· 45-day close</span>
+              <div class="ticket-actions">
+                <button class="btn btn-gold btn-sm" style="font-size:10px;" onclick="approveTicket('tkt3')">Approve</button>
+                <button class="btn btn-ghost btn-sm" style="font-size:10px;">Counter</button>
+                <button class="btn btn-danger btn-sm" style="font-size:10px;">Decline</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ticket" id="tkt4">
+          <div class="ticket-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="ticket-id">TKT-1882</div>
+            <div class="ticket-addr">1881 Greenbrook Ct, The Woodlands TX</div>
+            <div class="ticket-row-meta">
+              <span style="font-family:'Cormorant Garamond',serif; font-size:16px; color:var(--accent);">$445,000</span>
+              <span class="status-pill pill-green" style="font-size:10px; padding:2px 8px;">Full Ask</span>
+              <span class="status-pill" style="font-size:10px; padding:2px 8px; background:var(--red-dim); color:#c47a7a; border-color:rgba(155,74,74,0.25);">Unassigned</span>
+              <span style="font-size:11px; color:var(--text-dim); margin-left:auto;">30m ago</span>
+            </div>
+            <div class="row mt8" style="gap:6px; flex-wrap:wrap;">
+              <span style="font-size:11px; color:#c47a7a;">No agent assigned</span>
+              <div class="ticket-actions">
+                <button class="btn btn-ghost btn-sm" style="font-size:10px;" onclick="assignTicket('tkt4')">Assign</button>
+                <button class="btn btn-danger btn-sm" style="font-size:10px;">Decline</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center; padding:12px; font-size:12px; color:var(--text-dim); cursor:pointer; border:1px dashed var(--border); border-radius:var(--radius);" onmouseenter="this.style.color='var(--accent)'; this.style.borderColor='var(--accent-border)'" onmouseleave="this.style.color='var(--text-dim)'; this.style.borderColor='var(--border)'">View all 312 tickets →</div>
+      </div>
+
+      <!-- RIGHT: Revenue + Agents -->
+      <div>
+        <div class="card mb14">
+          <div class="card-pad">
+            <div class="section-label">Revenue — This Month</div>
+            <div class="rev-row" style="background:var(--accent-dim); border-color:var(--accent-border);">
+              <div><div class="rev-label">Subscription Fees</div><div class="rev-sub">Enterprise · 28 agent seats</div></div>
+              <div class="rev-amount gold">$4,200</div>
+            </div>
+            <div class="rev-row" style="background:var(--blue-dim); border-color:rgba(74,111,155,0.2);">
+              <div><div class="rev-label">Transaction Fees</div><div class="rev-sub">0.5% per close · 48 closings</div></div>
+              <div class="rev-amount" style="color:#7a9ec4;">$89,400</div>
+            </div>
+            <div class="rev-row" style="background:var(--amber-dim); border-color:rgba(155,122,74,0.2);">
+              <div><div class="rev-label">Preference Fees</div><div class="rev-sub">Banks · RE Companies · Featured</div></div>
+              <div class="rev-amount" style="color:#c49a5a;">$12,800</div>
+            </div>
+            <hr/>
+            <div class="row sb">
+              <span style="font-size:12px; color:var(--text-secondary);">Total Platform Revenue</span>
+              <span style="font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:500; color:var(--accent);">$106,400</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-pad">
+            <div class="row sb mb14">
+              <div class="section-label" style="margin-bottom:0;">Agent Roster</div>
+              <button class="btn btn-ghost btn-sm">+ Add Agent</button>
+            </div>
+            <div class="agent-row">
+              <div class="agent-av" style="background:var(--accent-dim); color:var(--accent); border:1px solid var(--accent-border);">SR</div>
+              <div style="flex:1;"><div class="agent-name">Sarah Reyes</div><div class="agent-zone">Houston Zone · 12 tickets</div></div>
+              <div class="online-dot green"></div>
+              <button class="btn btn-ghost btn-sm" style="font-size:10px; margin-left:6px;">Assign</button>
+            </div>
+            <div class="agent-row">
+              <div class="agent-av" style="background:var(--amber-dim); color:#c49a5a; border:1px solid rgba(155,122,74,0.3);">MJ</div>
+              <div style="flex:1;"><div class="agent-name">Marcus Johnson</div><div class="agent-zone">Sugar Land Zone · 8 tickets</div></div>
+              <div class="online-dot green"></div>
+              <button class="btn btn-ghost btn-sm" style="font-size:10px; margin-left:6px;">Assign</button>
+            </div>
+            <div class="agent-row">
+              <div class="agent-av" style="background:var(--blue-dim); color:#7a9ec4; border:1px solid rgba(74,111,155,0.3);">TW</div>
+              <div style="flex:1;"><div class="agent-name">Tanya Williams</div><div class="agent-zone">Katy / Pearland Zone · 17 tickets</div></div>
+              <div class="online-dot amber"></div>
+              <button class="btn btn-ghost btn-sm" style="font-size:10px; margin-left:6px;">Assign</button>
+            </div>
+            <div class="agent-row">
+              <div class="agent-av" style="background:var(--surface3); color:var(--text-dim); border:1px solid var(--border);">DK</div>
+              <div style="flex:1;"><div class="agent-name">David Kim</div><div class="agent-zone">Woodlands Zone · 0 tickets</div></div>
+              <div class="online-dot dim"></div>
+              <button class="btn btn-ghost btn-sm" style="font-size:10px; margin-left:6px;">Assign</button>
+            </div>
+            <div style="text-align:center; margin-top:12px; font-size:12px; color:var(--text-dim); cursor:pointer;" onmouseenter="this.style.color='var(--accent)'" onmouseleave="this.style.color='var(--text-dim)'">View all 28 agents →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /layout -->
+
+<!-- MODAL -->
+<div class="modal-bg" id="offerModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div style="margin-bottom:20px;">
+      <div style="font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:500; margin-bottom:6px;">Offer Submitted</div>
+      <div style="font-size:13px; color:var(--text-secondary);">Your offer on 4821 Elmwood Drive is live. You'll be notified the moment the seller responds.</div>
+    </div>
+    <div style="background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; margin-bottom:20px;">
+      <div class="row sb" style="font-size:13px; margin-bottom:8px;"><span class="muted">Offer Amount</span><span style="font-family:'Cormorant Garamond',serif; font-size:18px;">$385,000</span></div>
+      <div class="row sb" style="font-size:13px; margin-bottom:8px;"><span class="muted">Financing</span><span>Rocket Bank · 6.42% APR</span></div>
+      <div class="row sb" style="font-size:13px; margin-bottom:8px;"><span class="muted">Closing Date</span><span>April 15, 2026</span></div>
+      <div class="row sb" style="font-size:13px;"><span class="muted">Status</span><span class="gold">Pending Review</span></div>
+    </div>
+    <button class="btn btn-gold btn-block btn-lg" onclick="closeModal()">Track My Offer →</button>
+  </div>
+</div>
+
+<script>
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const idx = {browse:0, qualify:1, offer:2, contractor:3, seller:4};
+  document.querySelectorAll('.nav-btn')[idx[page]]?.classList.add('active');
+  document.querySelectorAll('.sidebar-item')[idx[page]]?.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function switchSellerMode(mode) {
+  document.getElementById('seller-individual').style.display = mode === 'individual' ? 'block' : 'none';
+  document.getElementById('seller-enterprise').style.display = mode === 'enterprise' ? 'block' : 'none';
+  document.querySelectorAll('.mode-tab').forEach((t, i) => {
+    t.classList.toggle('active', (mode === 'individual' && i === 0) || (mode === 'enterprise' && i === 1));
+  });
+}
+
+function approveTicket(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.transition = 'all 0.4s ease';
+  el.style.borderColor = 'rgba(74,155,127,0.4)';
+  el.style.background = 'rgba(74,155,127,0.05)';
+  el.querySelectorAll('.btn').forEach(b => b.disabled = true);
+  const appBtn = el.querySelector('.btn-gold');
+  if (appBtn) { appBtn.textContent = '✓ Approved'; }
+  setTimeout(() => {
+    el.style.opacity = '0'; el.style.transform = 'translateX(8px)';
+    setTimeout(() => el.remove(), 400);
+  }, 700);
+}
+
+function assignTicket(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const agents = [
+    {init:'SR', name:'Sarah R.', color:'var(--accent-dim)', bdr:'var(--accent-border)', txt:'var(--accent)'},
+    {init:'MJ', name:'Marcus J.', color:'var(--amber-dim)', bdr:'rgba(155,122,74,0.3)', txt:'#c49a5a'},
+    {init:'TW', name:'Tanya W.', color:'var(--blue-dim)', bdr:'rgba(74,111,155,0.3)', txt:'#7a9ec4'},
+  ];
+  const a = agents[Math.floor(Math.random() * agents.length)];
+  const noAgent = el.querySelector('[style*="No agent"]');
+  if (noAgent) {
+    noAgent.outerHTML = `<div style="display:flex;align-items:center;gap:5px;"><div style="width:18px;height:18px;border-radius:50%;background:${a.color};border:1px solid ${a.bdr};display:flex;align-items:center;justify-content:center;font-size:9px;color:${a.txt};font-weight:600;">${a.init}</div><span style="font-size:11px;color:var(--text-secondary)">${a.name}</span></div>`;
+  }
+  const unassignedPill = el.querySelector('[style*="Unassigned"]');
+  if (unassignedPill) {
+    unassignedPill.textContent = 'In Review';
+    unassignedPill.style.background = 'var(--blue-dim)';
+    unassignedPill.style.color = '#7a9ec4';
+    unassignedPill.style.borderColor = 'rgba(74,111,155,0.25)';
+  }
+  const assignBtn = el.querySelector('.btn-ghost');
+  if (assignBtn) { assignBtn.textContent = '✓ Assigned'; assignBtn.disabled = true; }
+}
+
+function autoAssign() {
+  ['tkt2','tkt4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) assignTicket(id);
+  });
+}
+
+function openModal() { document.getElementById('offerModal').classList.add('open'); }
+function closeModal() { document.getElementById('offerModal').classList.remove('open'); }
+
+document.querySelectorAll('.filter-chip').forEach(c => {
+  c.addEventListener('click', () => c.classList.toggle('on'));
+});
+</script>
+</body>
+</html>
